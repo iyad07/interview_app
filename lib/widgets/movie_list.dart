@@ -36,16 +36,75 @@ class _MovieListState extends State<MovieList> {
           return const Center(child: CircularProgressIndicator());
         } else if (movieProvider.error != null) {
           return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Error: ${movieProvider.error}'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => movieProvider.loadMovies(),
-                  child: const Text('Retry'),
-                ),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Error Icon
+                  Icon(
+                    movieProvider.isNetworkError 
+                        ? Icons.wifi_off_rounded 
+                        : Icons.error_outline_rounded,
+                    size: 64,
+                    color: movieProvider.isNetworkError 
+                        ? Colors.orange 
+                        : Colors.red,
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Error Title
+                  Text(
+                    movieProvider.isNetworkError 
+                        ? 'Connection Problem' 
+                        : 'Something Went Wrong',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  
+                  // Error Message
+                  Text(
+                    movieProvider.error!,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // Retry Button
+                  ElevatedButton.icon(
+                    onPressed: () => movieProvider.retryLoadMovies(),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Try Again'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  
+                  // Additional help text for network errors
+                  if (movieProvider.isNetworkError) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      'Please check your internet connection',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
           );
         } else if (movieProvider.movies.isEmpty && movieProvider.searchQuery.isEmpty) {
@@ -77,7 +136,7 @@ class _MovieListState extends State<MovieList> {
                     fillColor: Colors.grey[100],
                   ),
                   onChanged: (value) {
-                    movieProvider.searchMovies(value);
+                    movieProvider.searchMovies(value);//search function
                   },
                 ),
               ),
