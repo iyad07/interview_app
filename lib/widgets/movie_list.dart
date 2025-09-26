@@ -150,8 +150,26 @@ class _MovieListState extends State<MovieList> {
                         },
                         child: ListView.builder(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          itemCount: movieProvider.movies.length,
+                          itemCount: movieProvider.movies.length + (movieProvider.hasMorePages ? 1 : 0),
                           itemBuilder: (context, index) {
+                            // Show loading indicator at the end if there are more pages
+                            if (index == movieProvider.movies.length) {
+                              if (movieProvider.isLoadingMore) {
+                                return const Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              } else {
+                                // Trigger loading more movies when reaching the end
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  movieProvider.loadMoreMovies();
+                                });
+                                return const SizedBox.shrink();
+                              }
+                            }
+                            
                             final movie = movieProvider.movies[index];
                             return Card(
                               margin: const EdgeInsets.symmetric(vertical: 4.0),

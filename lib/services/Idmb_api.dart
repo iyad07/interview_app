@@ -12,10 +12,10 @@ class ImdbApi {
     _dio.options.sendTimeout = const Duration(seconds: 10);
   }
 
-  Future<List<MovieModel>> fetchMovies() async {
+  Future<List<MovieModel>> fetchMovies({int page = 1}) async {
     try {
       final response = await _dio.get(
-        'https://api.themoviedb.org/3/trending/movie/week?api_key=7089b375ee238e5d7fca81def7c5b1be'
+        'https://api.themoviedb.org/3/trending/movie/week?api_key=7089b375ee238e5d7fca81def7c5b1be&page=$page'
       );
 
       if (response.statusCode == 200) {

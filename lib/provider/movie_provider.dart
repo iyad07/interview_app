@@ -6,15 +6,20 @@ class MovieProvider extends ChangeNotifier {
   List<MovieModel> _movies = [];
   List<MovieModel> _filteredMovies = [];
   bool _isLoading = false;
+  bool _isLoadingMore = false;
   String? _error;
   String _searchQuery = '';
   bool _isNetworkError = false;
+  int _currentPage = 1;
+  bool _hasMorePages = true;
 
   List<MovieModel> get movies => _searchQuery.isEmpty ? _movies : _filteredMovies;
   bool get isLoading => _isLoading;
+  bool get isLoadingMore => _isLoadingMore;
   String? get error => _error;
   String get searchQuery => _searchQuery;
   bool get isNetworkError => _isNetworkError;
+  bool get hasMorePages => _hasMorePages;
 
   Future<List<MovieModel>> getTrendingMovies() async {
     try {
@@ -42,15 +47,23 @@ class MovieProvider extends ChangeNotifier {
     _isLoading = true;
     _error = null;
     _isNetworkError = false;
+    _currentPage = 1;
+    _hasMorePages = true;
     notifyListeners();
 
     try {
-      final movieList = await ImdbApi().fetchMovies();
+      final movieList = await ImdbApi().fetchMovies(page: _currentPage);
       _movies = movieList;
       _filteredMovies = movieList;
       _error = null;
       _isNetworkError = false;
       _isLoading = false;
+      
+      // Check if we got fewer than 20 movies (typical page size), indicating no more pages
+      if (movieList.length < 20) {
+        _hasMorePages = false;
+      }
+      
       notifyListeners();
     } on NetworkException catch (e) {
       _error = e.toString();
@@ -66,6 +79,47 @@ class MovieProvider extends ChangeNotifier {
       _error = 'An unexpected error occurred: ${e.toString()}';
       _isNetworkError = false;
       _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  void loadMoreMovies() async {
+    if (_isLoadingMore || !_hasMorePages || _searchQuery.isNotEmpty) return;
+    
+    _isLoadingMore = true;
+    notifyListeners();
+
+    try {
+      _currentPage++;
+      final moreMovies = await ImdbApi().fetchMovies(page: _currentPage);
+      
+      if (moreMovies.isNotEmpty) {
+        _movies.addAll(moreMovies);
+        if (_searchQuery.isEmpty) {
+          _filteredMovies = _movies;
+        }
+        
+        // Check if we got fewer than 20 movies, indicating no more pages
+        if (moreMovies.length < 20) {
+          _hasMorePages = false;
+        }
+      } else {
+        _hasMorePages = false;
+      }
+      
+      _isLoadingMore = false;
+      notifyListeners();
+    } on NetworkException catch (e) {
+      _currentPage--; // Revert page increment on error
+      _isLoadingMore = false;
+      notifyListeners();
+    } on ApiException catch (e) {
+      _currentPage--; // Revert page increment on error
+      _isLoadingMore = false;
+      notifyListeners();
+    } catch (e) {
+      _currentPage--; // Revert page increment on error
+      _isLoadingMore = false;
       notifyListeners();
     }
   }
