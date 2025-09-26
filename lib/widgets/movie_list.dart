@@ -140,68 +140,73 @@ class _MovieListState extends State<MovieList> {
                   },
                 ),
               ),
-              // Movies List
+              // Movies List with Pull-to-Refresh
               Expanded(
                 child: movieProvider.movies.isEmpty && movieProvider.searchQuery.isNotEmpty
                     ? const Center(child: Text('No movies found for your search'))
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        itemCount: movieProvider.movies.length,
-                        itemBuilder: (context, index) {
-                          final movie = movieProvider.movies[index];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: ListTile(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => MovieDetailPage(movie: movie),
-                                  ),
-                                );
-                              },
-                              leading: movie.imageUrl.isNotEmpty
-                                  ? ClipRRect(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      child: Image.network(
-                                        movie.imageUrl,
-                                        width: 50,
-                                        height: 75,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return const Icon(Icons.movie, size: 50);
-                                        },
-                                      ),
-                                    )
-                                  : const Icon(Icons.movie, size: 50),
-                              title: Text(
-                                movie.title,
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    movie.description,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.star, color: Colors.amber, size: 16),
-                                      Text(' ${movie.rating}'),
-                                      const SizedBox(width: 16),
-                                      const Icon(Icons.calendar_today, size: 16),
-                                      Text(' ${movie.releaseDate}'),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              isThreeLine: true,
-                            ),
-                          );
+                    : RefreshIndicator(
+                        onRefresh: () async {
+                          movieProvider.retryLoadMovies();
                         },
+                        child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          itemCount: movieProvider.movies.length,
+                          itemBuilder: (context, index) {
+                            final movie = movieProvider.movies[index];
+                            return Card(
+                              margin: const EdgeInsets.symmetric(vertical: 4.0),
+                              child: ListTile(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => MovieDetailPage(movie: movie),
+                                    ),
+                                  );
+                                },
+                                leading: movie.imageUrl.isNotEmpty
+                                    ? ClipRRect(
+                                        borderRadius: BorderRadius.circular(8.0),
+                                        child: Image.network(
+                                          movie.imageUrl,
+                                          width: 50,
+                                          height: 75,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) {
+                                            return const Icon(Icons.movie, size: 50);
+                                          },
+                                        ),
+                                      )
+                                    : const Icon(Icons.movie, size: 50),
+                                title: Text(
+                                  movie.title,
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      movie.description,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.star, color: Colors.amber, size: 16),
+                                        Text(' ${movie.rating}'),
+                                        const SizedBox(width: 16),
+                                        const Icon(Icons.calendar_today, size: 16),
+                                        Text(' ${movie.releaseDate}'),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                isThreeLine: true,
+                              ),
+                            );
+                          },
+                        ),
                       ),
                 ),
               ],
