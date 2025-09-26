@@ -182,27 +182,19 @@ class _MovieListState extends State<MovieList> {
                                   movie.title,
                                   style: const TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                subtitle: Row(
                                   children: [
+                                    const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
+                                    const SizedBox(width: 4),
                                     Text(
-                                      movie.description,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Row(
-                                      children: [
-                                        const Icon(Icons.star, color: Colors.amber, size: 16),
-                                        Text(' ${movie.rating}'),
-                                        const SizedBox(width: 16),
-                                        const Icon(Icons.calendar_today, size: 16),
-                                        Text(' ${movie.releaseDate}'),
-                                      ],
+                                      movie.releaseDate,
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 14,
+                                      ),
                                     ),
                                   ],
                                 ),
-                                isThreeLine: true,
                               ),
                             );
                           },
